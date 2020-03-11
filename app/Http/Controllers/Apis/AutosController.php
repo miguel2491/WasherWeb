@@ -122,4 +122,14 @@ class AutosController extends Controller {
 		return response()->json(['data' => $results]);
 	}
 
+
+	public function listadoAutoUser($id) {
+		$results = DB::table('autos as a')
+		->select('a.id_auto', 'a.marca')
+		->where('a.id_usuario', $id)
+        ->get();
+		return response()->json(['data' => $results]);
+	}
+
+
 }

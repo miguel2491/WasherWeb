@@ -41,6 +41,7 @@ Route::delete('paquetes/delete/{id}', 'Catalogos\PaquetesController@destroy');
 Route::post('login/app', 'PaymentsController@login_app');
 //Autos
 Route::get('auto/listado', 'Apis\AutosController@listado');
+Route::get('auto/listadoAutoUser/{id}', 'Apis\AutosController@listadoAutoUser');
 Route::post('auto/guardar', 'PaymentsController@store');
 Route::post('auto/imagen', 'PaymentsController@imagen');
 Route::get('auto/datos/{id}', 'Apis\AutosController@edit');
