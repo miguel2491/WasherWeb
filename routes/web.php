@@ -48,6 +48,7 @@ Route::delete('auto/delete/{id}', 'Apis\AutosController@destroy');
 //Direcciones
 Route::post('direccion/guardar', 'Apis\DireccionesController@store');
 Route::get('direccion/listado', 'Apis\DireccionesController@listado');
+Route::get('direccion/listado/{id}', 'Apis\DireccionesController@listadoUser');
 Route::get('direccion/datos/{id}', 'Apis\DireccionesController@edit');
 Route::delete('direccion/delete/{id}', 'Apis\DireccionesController@destroy');
 //

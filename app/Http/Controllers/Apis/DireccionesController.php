@@ -99,4 +99,12 @@ class DireccionesController extends Controller {
 		return response()->json(['data' => $results]);
 	}
 
+	public function listadoUser($id) {
+		$results = DB::table('direcciones as d')
+		->select('d.id_direccion', 'd.descripcion')
+		->where('d.id_usuario', $id)
+        ->get();
+		return response()->json(['data' => $results]);
+	}
+
 }
