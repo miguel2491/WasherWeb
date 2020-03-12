@@ -104,7 +104,7 @@ class DireccionesController extends Controller {
 		->select('d.id_direccion', 'd.descripcion','d.longitud','d.latitud')
 		->where('d.id_usuario', $id)
         ->get();
-		return response()->json(['data' => $results]);
+		return response()->json([$results]);
 	}
 
 }
