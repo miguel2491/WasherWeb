@@ -101,7 +101,7 @@ class DireccionesController extends Controller {
 
 	public function listadoUser($id) {
 		$results = DB::table('direcciones as d')
-		->select('d.id_direccion', 'd.descripcion')
+		->select('d.id_direccion', 'd.descripcion','d.longitud','d.latitud')
 		->where('d.id_usuario', $id)
         ->get();
 		return response()->json(['data' => $results]);
