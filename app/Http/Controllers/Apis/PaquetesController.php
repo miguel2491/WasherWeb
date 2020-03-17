@@ -109,4 +109,20 @@ class PaquetesController extends Controller {
 		return response()->json($results);
 	}
 
+	public function lis_ind($id)
+	{
+		$results = Paquete::join('paquetes', 'paquetes_lavado.id_paquete', '=', 'paquetes.id_paquete')
+			->select(
+				'paquetes_lavado.nombre',
+				'paquetes_lavado.descripcion',
+				'paquetes.tipo_vehiculo',
+				'paquetes.duracion',
+				'paquetes.precio'
+			)
+			->where('paquetes_lavado.id_paquete', $id)
+			->get();
+		
+		return response()->json($results);	
+	}
+
 }

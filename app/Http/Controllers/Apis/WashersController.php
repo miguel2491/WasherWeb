@@ -23,16 +23,42 @@ class WashersController extends Controller {
 	public function index() {
 		//return view('Catalogos/paquetes.index');
 	}
-	public function login(Request $request) {
+	public function login(Request $request)
+	{
+		$msg = [];
 		$usuario = request('usuario');
         $pass = request('pass');
         if (Auth::attempt(['email' => $usuario, 'password' => $pass])) {
-            $msg = ['status' => 'ok', 'msg' => 'Bienvenido'];
+        	$msg = DB::table('users as u')
+				->select('u.id', 'u.nombre','u.username','u.password','u.email','u.remember_token','u.name','u.google_id')
+				->where('u.email', $usuario)
+		        ->get();
         } else {
-            $msg = ['status' => 'fail', 'msg' => 'Negado'.$usuario];
+            $msg[] = [
+            	'nombre'=>'fail'
+            ];
         }
         return response()->json($msg);
 	}
+	//TEMPORAL
+	public function loginChema(Request $request)
+	{
+		$msg = [];
+		$usuario = "washdryappssoporte@gmail.com";
+        $pass = "1234";
+        if (Auth::attempt(['email' => $usuario, 'password' => $pass])) {
+        	$msg = DB::table('users as u')
+				->select('u.id', 'u.nombre','u.username','u.password','u.email','u.remember_token','u.name','u.google_id')
+				->where('u.email', $usuario)
+		        ->get();
+        } else {
+            $msg[] = [
+            	'nombre'=>'fail'
+            ];
+        }
+        return response()->json($msg);
+	}
+
 	public function recupera_pass(Request $request) {
 		$email = request('correo');
         
@@ -142,6 +168,16 @@ class WashersController extends Controller {
 		->select('w.id_washer', 'w.nombre')
         ->get();
 		return response()->json(['data' => $results]);
+	}
+
+	public function getSolicitud($id)
+	{
+		$results = DB::table('solicitud as s')
+		->select('s.id_solicitud','s.id_washer', 's.id_usuario', 's.fecha','s.calificacion','w.nombre')
+        ->leftjoin('washers as w', 'w.id_usuario', '=', 's.id_usuario')
+        ->where('s.id_usuario',$id)
+		->get();
+		return response()->json($results);
 	}
 
 }

@@ -8,6 +8,9 @@ use Stripe\Charge;
 use DB;
 use App;
 use Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Image;
 use App\Http\Controllers\Controller;
 use App\Models\Apis\Autos;
 use Illuminate\Support\Facades\Hash;
@@ -88,12 +91,14 @@ class PaymentsController extends Controller
     }
 
     public function imagen(Request $request){
-        $filename = time()."-".basename($_FILES['imagen']['name']);
-            $upload = $request->file('imagen')->storeAs(
-                'uploads/autos/', $filename
-            );
-            $msg = ['status' => 'ok', 'mensaje' => $upload];
-        return response()->json($msg);    
+
+        $filename = time()."-".basename($request->file('imagen'));
+        //$foto_extension = File::extension($request->file('imagen')->getClientOriginalName());
+            /*$upload = $request->file('imagen')->storeAs(
+                'uploads/autos', $filename.'.'.$foto_extension
+            );*/
+            $msg = ['status' => 'ok', 'mensaje' => $filename];
+        return response()->json($msg);
     }
 
 }
