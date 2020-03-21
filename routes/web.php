@@ -47,18 +47,20 @@ Route::post('auto/imagen', 'PaymentsController@imagen');
 Route::get('auto/datos/{id}', 'Apis\AutosController@edit');
 Route::delete('auto/delete/{id}', 'Apis\AutosController@destroy');
 //Direcciones
-
 Route::get('direccion/listado', 'Apis\DireccionesController@listado');
 Route::post('direccion/guardar', 'Apis\DireccionesController@guardar');
 Route::get('direccion/listado/{id}', 'Apis\DireccionesController@listadoUser');
 Route::get('direccion/datos/{id}', 'Apis\DireccionesController@edit');
 Route::delete('direccion/delete/{id}', 'Apis\DireccionesController@destroy');
-//
+//Solicitudes
 
+Route::get('solicitud/listado/{id}', 'Apis\SolicitudController@listadoSolicitud');
+Route::post('solicitud/califica', 'Apis\SolicitudController@calificaSolicitud');
 //***APP 2***/
 Route::post('washer/login', 'Apis\WashersController@login');
 Route::get('washer/loginChema', 'Apis\WashersController@loginChema');
 Route::post('washer/recupera_pass', 'Apis\WashersController@recupera_pass');
+
 //Paquetes
 Route::get('paquete/listado', 'Apis\PaquetesController@listado');
 Route::post('paquete/guardar', 'Apis\PaquetesController@store');
@@ -67,7 +69,10 @@ Route::put('paquete/update/{id}', 'Apis\PaquetesController@update');
 Route::delete('paquete/delete/{id}', 'Apis\PaquetesController@destroy');
 Route::get('paquete/individual/{id}', 'Apis\PaquetesController@lis_ind');
 //Registros
-
 Route::get('washer/lista', 'Apis\WashersController@listado');
 Route::get('washer/get_solicitud/{id}', 'Apis\WashersController@getSolicitud');
 Route::post('washer/guardar', 'Apis\WashersController@store');
+Route::post('washer/update', 'Apis\WashersController@update');
+Route::get('washer/perfil/{id}', 'Apis\WashersController@getPerfilWasher');
+Route::get('washer/autos_lavar/{id}', 'Apis\WashersController@getAutosLavar');
+Route::get('washer/autos_lavarDetalle/{id}', 'Apis\WashersController@getAutosLavarDetalle');
