@@ -37,6 +37,6 @@ return [
     'google' => [
         'client_id' => '155072326330-02k473ju9hri2neb442vidtob2hb8urs.apps.googleusercontent.com',         // Your google Client ID
         'client_secret' => 'kPq68NOQMPUwDxQVHUavsalt', // Your google Client Secret
-        'redirect' => 'http://localhost:8080/Washer/public/login/google/callback',//'http://localhost:8000/login/google/callback',
+        'redirect' => 'http://www.washdryapp.com/app/public/login/google/callback',
     ],
 ];

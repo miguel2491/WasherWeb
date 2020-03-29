@@ -183,7 +183,7 @@ class DireccionesController extends Controller {
 
         ->get();
 
-		return response()->json(['data' => $results]);
+		return response()->json($results);
 
 	}
 

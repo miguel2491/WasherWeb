@@ -28,11 +28,32 @@ class WashersController extends Controller {
 		$msg = [];
 		$usuario = request('usuario');
         $pass = request('pass');
+        $token = request('token');
         if (Auth::attempt(['email' => $usuario, 'password' => $pass])) {
         	$msg = DB::table('users as u')
-				->select('u.id', 'u.nombre','u.username','u.password','u.email','u.remember_token','u.name','u.google_id')
+				->select('u.id', 'u.nombre','u.username','u.password','u.email','u.remember_token','u.name','u.google_id','u.token')
 				->where('u.email', $usuario)
 		        ->get();
+		    $id = $msg[0]->id;
+		    $cat_usuario = Usuario::findOrFail($id);
+        	$cat_usuario->token = $token;
+        	DB::beginTransaction();
+			try {
+				if ($cat_usuario->save()) {
+					//$msg = ['status' => 'ok', 'message' => 'Se ha agrego la calificacion'];
+				}
+			} catch (\Illuminate\Database\QueryException $ex) {
+				DB::rollback();
+				$msg = ['status' => 'fail', 'message' => 'No se pudo actualizar correcta, por favor consulte con el administrador del sistema.', 'exception' => $ex->getMessage()];
+				return response()->json($msg, 400);
+			} catch (\Exception $ex) {
+				DB::rollback();
+				
+				$msg = ['status' => 'fail', 'message' => 'No se pudo actualizar correctamente, por favor consulte con el administrador del sistema.', 'exception' => $ex->getMessage()];
+				return response()->json($msg, 400);
+			} finally {
+				DB::commit();
+			}	
         } else {
             $msg[] = [
             	'nombre'=>'fail'
@@ -44,7 +65,7 @@ class WashersController extends Controller {
 	public function loginChema(Request $request)
 	{
 		$msg = [];
-		$usuario = "washdryappssoporte@gmail.com";
+		$usuario = "yane@mail.com";
         $pass = "1234";
         if (Auth::attempt(['email' => $usuario, 'password' => $pass])) {
         	$msg = DB::table('users as u')
@@ -218,7 +239,7 @@ class WashersController extends Controller {
 
 	public function listado() {
 		$results = DB::table('washers as w')
-		->select('w.id_washer', 'w.nombre')
+		->select('w.id_washer', 'w.nombre', 'w.calificacion', 'w.foto_ine')
         ->get();
 		return response()->json($results);
 	}
@@ -226,7 +247,7 @@ class WashersController extends Controller {
 	public function getSolicitud($id)
 	{
 		$results = DB::table('solicitud as s')
-		->select('s.id_solicitud','s.id_washer', 's.id_usuario', 's.fecha','s.calificacion','w.nombre')
+		->select('s.id_solicitud','s.id_washer', 's.id_usuario', 's.fecha','s.calificacion', 's.latitud', 's.longitud','w.nombre')
         ->leftjoin('washers as w', 'w.id_usuario', '=', 's.id_usuario')
         ->where('s.id_usuario',$id)
 		->get();
@@ -264,6 +285,43 @@ class WashersController extends Controller {
 		->where('s.id_solicitud',$id)
 		->get();
 		return response()->json($results);	
+	}
+
+	public function notifica()
+	{
+		$fcmUrl = 'https://fcm.googleapis.com/fcm/send';
+        $token="fihKnhC3KpI:APA91bFTWLTZXO4gQEMu0UKGsFgsTUEl8IqzW0Tt2SaTx5XXaYcDTmecN1N59SOTmzV7GgfsNYd7ySZOtLL0O00v--bwGfuFplNoHjedJeLXKddWLn4qm7jevS3X6w_j9RKGGstJnCXf";
+        $title = "HOLA";
+
+        $notification = [
+            'title' => $title,
+            'sound' => true,
+        ];
+        
+        $extraNotificationData = ["message" => $notification,"moredata" =>'dd'];
+
+        $fcmNotification = [
+            //'registration_ids' => $tokenList, //multple token array
+            'to'        => $token, //single token
+            'notification' => $notification,
+            'data' => $extraNotificationData
+        ];
+
+        $headers = [
+            'Authorization: key=Legacy server key',
+            'Content-Type: application/json'
+        ];
+
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL,$fcmUrl);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmNotification));
+        $result = curl_exec($ch);
+        curl_close($ch);
 	}
 
 }

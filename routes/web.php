@@ -53,9 +53,10 @@ Route::get('direccion/listado/{id}', 'Apis\DireccionesController@listadoUser');
 Route::get('direccion/datos/{id}', 'Apis\DireccionesController@edit');
 Route::delete('direccion/delete/{id}', 'Apis\DireccionesController@destroy');
 //Solicitudes
-
+Route::post('solicitud/agrega', 'Apis\SolicitudController@store');
 Route::get('solicitud/listado/{id}', 'Apis\SolicitudController@listadoSolicitud');
 Route::post('solicitud/califica', 'Apis\SolicitudController@calificaSolicitud');
+
 //***APP 2***/
 Route::post('washer/login', 'Apis\WashersController@login');
 Route::get('washer/loginChema', 'Apis\WashersController@loginChema');
@@ -76,3 +77,5 @@ Route::post('washer/update', 'Apis\WashersController@update');
 Route::get('washer/perfil/{id}', 'Apis\WashersController@getPerfilWasher');
 Route::get('washer/autos_lavar/{id}', 'Apis\WashersController@getAutosLavar');
 Route::get('washer/autos_lavarDetalle/{id}', 'Apis\WashersController@getAutosLavarDetalle');
+//Notificaciones
+Route::post('washer/notificaciones', 'Apis\WashersController@notifica');

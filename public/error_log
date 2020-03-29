@@ -1,0 +1,1 @@
+[08-Mar-2020 19:47:11 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\Apis\WashersController::store() in /home/washdryappsct/public_html/app/app/Http/Controllers/Apis/WashersController.php on line 31
