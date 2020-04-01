@@ -35,6 +35,7 @@ Route::post('paquetes/guardar', 'Catalogos\PaquetesController@store');
 Route::get('paquetes/datos/{id}', 'Catalogos\PaquetesController@edit');
 Route::put('paquetes/update/{id}', 'Catalogos\PaquetesController@update');
 Route::delete('paquetes/delete/{id}', 'Catalogos\PaquetesController@destroy');
+
 //------------------
 //*********APP******/
 //------------------
@@ -55,12 +56,15 @@ Route::delete('direccion/delete/{id}', 'Apis\DireccionesController@destroy');
 //Solicitudes
 Route::post('solicitud/agrega', 'Apis\SolicitudController@store');
 Route::get('solicitud/listado/{id}', 'Apis\SolicitudController@listadoSolicitud');
+Route::get('solicitud/lista_solicitud/{id}', 'Apis\SolicitudController@listadoporSolicitud');
 Route::post('solicitud/califica', 'Apis\SolicitudController@calificaSolicitud');
+Route::post('solicitud/aceptar_solicitud', 'Apis\SolicitudController@aceptar_solicitud');
 
 //***APP 2***/
 Route::post('washer/login', 'Apis\WashersController@login');
 Route::get('washer/loginChema', 'Apis\WashersController@loginChema');
 Route::post('washer/recupera_pass', 'Apis\WashersController@recupera_pass');
+
 
 //Paquetes
 Route::get('paquete/listado', 'Apis\PaquetesController@listado');
@@ -69,6 +73,7 @@ Route::get('paquete/datos/{id}', 'Apis\PaquetesController@edit');
 Route::put('paquete/update/{id}', 'Apis\PaquetesController@update');
 Route::delete('paquete/delete/{id}', 'Apis\PaquetesController@destroy');
 Route::get('paquete/individual/{id}', 'Apis\PaquetesController@lis_ind');
+Route::post('paquetes/precios', 'Apis\PaquetesController@preciosList');
 //Registros
 Route::get('washer/lista', 'Apis\WashersController@listado');
 Route::get('washer/get_solicitud/{id}', 'Apis\WashersController@getSolicitud');
@@ -79,3 +84,4 @@ Route::get('washer/autos_lavar/{id}', 'Apis\WashersController@getAutosLavar');
 Route::get('washer/autos_lavarDetalle/{id}', 'Apis\WashersController@getAutosLavarDetalle');
 //Notificaciones
 Route::post('washer/notificaciones', 'Apis\WashersController@notifica');
+Route::get('mail/recuperaPass', 'Apis\WashersController@send');
