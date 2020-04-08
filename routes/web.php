@@ -59,13 +59,17 @@ Route::get('solicitud/listado/{id}', 'Apis\SolicitudController@listadoSolicitud'
 Route::get('solicitud/lista_solicitud/{id}', 'Apis\SolicitudController@listadoporSolicitud');
 Route::post('solicitud/califica', 'Apis\SolicitudController@calificaSolicitud');
 Route::post('solicitud/aceptar_solicitud', 'Apis\SolicitudController@aceptar_solicitud');
+Route::get('solicitud/cliente/{id}', 'Apis\SolicitudController@consultaCliente');
 
+//**APP 1**/
+Route::post('solicitud/agrega_cliente', 'Apis\SolicitudController@guarda_cliente');
+Route::post('solicitud/login_cliente', 'Apis\SolicitudController@login_cliente');
 //***APP 2***/
 Route::post('washer/login', 'Apis\WashersController@login');
 Route::get('washer/loginChema', 'Apis\WashersController@loginChema');
 Route::post('washer/recupera_pass', 'Apis\WashersController@recupera_pass');
-
-
+//Cliente Update
+Route::post('cliente/califica', 'Apis\CalificacionController@store');
 //Paquetes
 Route::get('paquete/listado', 'Apis\PaquetesController@listado');
 Route::post('paquete/guardar', 'Apis\PaquetesController@store');
@@ -74,14 +78,20 @@ Route::put('paquete/update/{id}', 'Apis\PaquetesController@update');
 Route::delete('paquete/delete/{id}', 'Apis\PaquetesController@destroy');
 Route::get('paquete/individual/{id}', 'Apis\PaquetesController@lis_ind');
 Route::post('paquetes/precios', 'Apis\PaquetesController@preciosList');
+Route::post('paquete/precio_individual', 'Apis\PaquetesController@lis_ind_esp');
+
 //Registros
 Route::get('washer/lista', 'Apis\WashersController@listado');
 Route::get('washer/get_solicitud/{id}', 'Apis\WashersController@getSolicitud');
+Route::get('washer/get_solicitud_lavado/{id}', 'Apis\WashersController@getSolicitudLavado');
 Route::post('washer/guardar', 'Apis\WashersController@store');
 Route::post('washer/update', 'Apis\WashersController@update');
 Route::get('washer/perfil/{id}', 'Apis\WashersController@getPerfilWasher');
 Route::get('washer/autos_lavar/{id}', 'Apis\WashersController@getAutosLavar');
 Route::get('washer/autos_lavarDetalle/{id}', 'Apis\WashersController@getAutosLavarDetalle');
+
+Route::post('washer/guardar_img', 'Apis\WashersController@storeImg');
+
 //Notificaciones
 Route::post('washer/notificaciones', 'Apis\WashersController@notifica');
 Route::get('mail/recuperaPass', 'Apis\WashersController@send');

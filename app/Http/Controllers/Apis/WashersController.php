@@ -265,16 +265,33 @@ class WashersController extends Controller {
 	public function getSolicitud($id)
 	{
 		$results = DB::table('solicitud as s')
-		->select('s.id_solicitud','s.id_washer', 's.id_usuario', 's.id_paquete', 's.id_auto', 's.fecha','s.calificacion', 's.latitud', 's.longitud', 's.fecha', 'u.nombre', 'a.modelo', 'a.ann', 'a.placas', 'p.tipo_vehiculo', 'p.precio', 'pa.nombre as paquete')
+		->select('s.id_solicitud','s.id_washer', 's.id_usuario', 's.id_paquete', 's.id_auto', 's.fecha','s.calificacion', 's.latitud', 's.longitud', 's.fecha', 'u.nombre', 'u.foto', 'a.modelo', 'a.ann', 'a.placas', 'p.tipo_vehiculo', 'p.precio', 'pa.nombre as paquete')
         ->leftjoin('washers as w', 'w.id_usuario', '=', 's.id_usuario')
         ->leftjoin('users as u', 'u.id', '=', 's.id_usuario')
         ->leftjoin('autos as a', 'a.id_auto', '=', 's.id_auto')
         ->leftjoin('paquetes as p', 'p.id', '=', 's.id_paquete')
         ->leftjoin('paquetes_lavado as pa', 'pa.id_paquete', '=', 'p.id_paquete')
         ->where('s.id_washer',$id)
+        ->where('s.status','<', 5)
 		->get();
 		return response()->json($results);
 	}
+
+	public function getSolicitudLavado($id)
+	{
+		$results = DB::table('solicitud as s')
+		->select('s.id_solicitud','s.id_washer', 's.id_usuario', 's.id_paquete', 's.id_auto', 's.fecha','s.calificacion', 's.latitud', 's.longitud', 's.fecha', 'u.nombre', 'u.foto', 'a.modelo', 'a.ann', 'a.placas', 'p.tipo_vehiculo', 'p.precio', 'pa.nombre as paquete')
+        ->leftjoin('washers as w', 'w.id_usuario', '=', 's.id_usuario')
+        ->leftjoin('users as u', 'u.id', '=', 's.id_usuario')
+        ->leftjoin('autos as a', 'a.id_auto', '=', 's.id_auto')
+        ->leftjoin('paquetes as p', 'p.id', '=', 's.id_paquete')
+        ->leftjoin('paquetes_lavado as pa', 'pa.id_paquete', '=', 'p.id_paquete')
+        ->where('s.id_washer',$id)
+        ->where('s.status','=', '5')
+		->get();
+		return response()->json($results);
+	}
+
 
 	public function getPerfilWasher($id)
 	{
@@ -398,4 +415,20 @@ class WashersController extends Controller {
         curl_close($ch);
         //return $result;
 	}
+
+	public function storeImg(Request $request) {
+	    
+        $uploaddir = 'uploads/autos/';
+        $ext =  $request->file('file')->getClientOriginalExtension();
+
+		$filename = time().'.'.$ext;//time().'.'.$ext;
+
+		$upload = $request->file('file')->storeAs(
+
+		    'uploads/autos', $filename
+
+		);
+        
+        return $upload;
+    }
 }

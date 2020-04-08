@@ -10,7 +10,8 @@ use App;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Apis\Autos;
+use App\Models\Catalogos\Calificaciones;
+use App\Models\Catalogos\Solicitudes;
 
 use App\User;
 
@@ -24,23 +25,13 @@ use Illuminate\Support\Facades\Hash;
 
 
 
-class AutosController extends Controller {
+class CalificacionController extends Controller {
 
 	public function __construct() {
 
 		//$this->middleware('auth');
 
 	}
-
-	/**
-
-	 * Mostrar un listado de los recursos.
-
-	 *
-
-	 * @return \Illuminate\Http\Response
-
-	 */
 
 	public function index() {
 
@@ -51,49 +42,26 @@ class AutosController extends Controller {
 	//INSERT
 
 	public function store(Request $request) {
+		$id_solicitud = request('id_solicitud');
+        $cat_calificacion = new Calificaciones();
 
-        $cat_autos = new Autos();
+        $cat_calificacion->id_solicitud = $request->Input("id_solicitud");
 
-        $cat_autos->placas = $request->Input("placas");
+        $cat_calificacion->calificacion = $request->Input("calificacion");
 
-        $cat_autos->modelo = $request->Input("modelo");
-
-        $cat_autos->ann = $request->Input("ann");
-
-        $cat_autos->marca = $request->Input("marca");
-
-        $cat_autos->color = $request->Input("color");
-
-        //$cat_autos->imagen = $request->Input("imagen");
-
-        $ext =  $request->file('image')->getClientOriginalExtension();
-
-		$filename = time().'.'.$ext;
-
-		$upload = $request->file('image')->storeAs(
-
-		    'uploads/autos', $filename
-
-		);	
-
-		if($upload){
-
-            $cat_autos->imagen = $request->Input("imagen");
-
-        }
-
-                
+        $cat_calificacion->comentario = $request->Input("comentario");
 
         DB::beginTransaction();
 
 		try {
 
-			if ($cat_autos->save()) {
-
-                $msg = ['status' => 'ok', 'message' => 'Se ha guardado correctamente'];
-
+			if ($cat_calificacion->save()) {
+				$cat_solicitud = Solicitudes::findOrFail($id_solicitud);
+                $cat_solicitud->status = 0;
+                if ($cat_solicitud->save()) {
+                	$msg = ['status' => 'ok', 'message' => 'Se ha guardado correctamente'];	
+                }
 			}
-
 		} catch (\Illuminate\Database\QueryException $ex) {
 
 			DB::rollback();
@@ -243,28 +211,5 @@ class AutosController extends Controller {
 		return response()->json($results);
 
 	}
-
-
-
-
-
-	public function listadoAutoUser($id) {
-
-		$results = DB::table('autos as a')
-
-		->select('a.id_auto', 'a.marca', 'a.imagen')
-
-		->where('a.id_usuario', $id)
-
-        ->get();
-
-		return response()->json($results);
-
-	}
-
-
-
-
-
 }
 
