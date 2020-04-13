@@ -43,7 +43,7 @@ Route::post('login/app', 'PaymentsController@login_app');
 //Autos
 Route::get('auto/listado', 'Apis\AutosController@listado');
 Route::get('auto/listadoAutoUser/{id}', 'Apis\AutosController@listadoAutoUser');
-Route::post('auto/guardar', 'PaymentsController@store');
+Route::post('auto/guardar', 'Apis\AutosController@store');
 Route::post('auto/imagen', 'PaymentsController@imagen');
 Route::get('auto/datos/{id}', 'Apis\AutosController@edit');
 Route::delete('auto/delete/{id}', 'Apis\AutosController@destroy');
@@ -64,6 +64,9 @@ Route::get('solicitud/cliente/{id}', 'Apis\SolicitudController@consultaCliente')
 //**APP 1**/
 Route::post('solicitud/agrega_cliente', 'Apis\SolicitudController@guarda_cliente');
 Route::post('solicitud/login_cliente', 'Apis\SolicitudController@login_cliente');
+Route::post('solicitud/detalle', 'Apis\SolicitudController@modifica_cal');
+Route::post('solicitud/solicitud_img', 'Apis\SolicitudController@agrega_img');
+
 //***APP 2***/
 Route::post('washer/login', 'Apis\WashersController@login');
 Route::get('washer/loginChema', 'Apis\WashersController@loginChema');
@@ -90,7 +93,11 @@ Route::get('washer/perfil/{id}', 'Apis\WashersController@getPerfilWasher');
 Route::get('washer/autos_lavar/{id}', 'Apis\WashersController@getAutosLavar');
 Route::get('washer/autos_lavarDetalle/{id}', 'Apis\WashersController@getAutosLavarDetalle');
 
-Route::post('washer/guardar_img', 'Apis\WashersController@storeImg');
+Route::post('washer/guardar_img', 'Apis\WashersController@store');
+
+//Pagos
+Route::post('pagos/generar', 'Apis\PagosController@store');
+Route::post('pagos/listaPagos', 'Apis\PagosController@listadoPagosWasher');
 
 //Notificaciones
 Route::post('washer/notificaciones', 'Apis\WashersController@notifica');

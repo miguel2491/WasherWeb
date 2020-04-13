@@ -57,9 +57,10 @@ class CalificacionController extends Controller {
 
 			if ($cat_calificacion->save()) {
 				$cat_solicitud = Solicitudes::findOrFail($id_solicitud);
-                $cat_solicitud->status = 0;
+                $cat_solicitud->status = 5;
                 if ($cat_solicitud->save()) {
                 	$msg = ['status' => 'ok', 'message' => 'Se ha guardado correctamente'];	
+                	//Notifica sobre tu calificacion
                 }
 			}
 		} catch (\Illuminate\Database\QueryException $ex) {

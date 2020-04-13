@@ -183,12 +183,19 @@ class PaymentsController extends Controller
 
 
     public function imagen(Request $request){
-        $filename = time()."-".basename($request->file('imagen'));
-        $foto_extension = File::extension($request->file('imagen')->getClientOriginalName());
-            $upload = $request->file('imagen')->storeAs(
+        $filename = time()."-".basename($request->file('file'));
+        $foto_extension = File::extension($request->file('file')->getClientOriginalName());
+            $uploaddir = '../oficial/Perfil/';
+            $uploadfile = $uploaddir.$filename;
+            if (move_uploaded_file($request->file('file'), $uploadfile)) {
+                $dataDB['status'] = 'success';       
+             } else {
+                $dataDB['status'] =  'failure';       
+             }
+            /*$upload = $request->file('file')->storeAs(
                 'uploads/autos', $filename.'.'.$foto_extension
-            );
-            $msg = ['status' => 'ok', 'mensaje' => $filename];
+            );*/
+            $msg = ['filename' => $filename];
         return response()->json($msg);
     }
 

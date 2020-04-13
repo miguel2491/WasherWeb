@@ -10,7 +10,10 @@ use App;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Apis\Autos;
+use App\Models\Catalogos\Pagos;
+use Stripe\Stripe;
+
+use Stripe\Charge;
 
 use App\User;
 
@@ -24,7 +27,7 @@ use Illuminate\Support\Facades\Hash;
 
 
 
-class AutosController extends Controller {
+class PagosController extends Controller {
 
 	public function __construct() {
 
@@ -32,19 +35,7 @@ class AutosController extends Controller {
 
 	}
 
-	/**
-
-	 * Mostrar un listado de los recursos.
-
-	 *
-
-	 * @return \Illuminate\Http\Response
-
-	 */
-
 	public function index() {
-
-		//return view('Catalogos/paquetes.index');
 
 	}
 
@@ -52,29 +43,53 @@ class AutosController extends Controller {
 
 	public function store(Request $request) {
 
-        $cat_autos = new Autos();
+		Stripe::setApiKey(config('services.stripe.secret'));
 
-        $cat_autos->id_usuario = $request->Input("id_usuario");
+        $token = request('stripeToken');
+        $email = request('email');
+        $monto = request("monto");
+        $montoStripe = $monto * 100;
 
-        $cat_autos->placas = $request->Input("placas");
+        $charge = Charge::create([
 
-        $cat_autos->modelo = $request->Input("modelo");
+            'amount' => $montoStripe,
 
-        $cat_autos->ann = $request->Input("ann");
+            'currency' => 'mxn',
 
-        $cat_autos->marca = $request->Input("marca");
+            'description' => 'Test Washers',
 
-        $cat_autos->color = $request->Input("color");
+            'source' => $token,
 
-        $cat_autos->imagen = $request->Input("imagen");
+        ]);
+
+        $estatuss = $charge['status'] == "succeeded" ? 1:0;
+        $fecha_a =  date('Y-m-d');
+        if($estatuss == 1){
+        	$cat_pagos = new Pagos();
+
+        $cat_pagos->id_usuario = request("id_usuario");
+
+        $cat_pagos->id_washer = request("id_washer");
+
+        $cat_pagos->id_solicitud = request("id_solicitud");
+
+        $cat_pagos->monto = request("monto");
+
+        $cat_pagos->cambio = request("cambio");
+
+        $cat_pagos->tipo_pago = request("tipo_pago");
+
+        $cat_pagos->status = 1;
+
+		$cat_pagos->created_at = $fecha_a;        
 
         DB::beginTransaction();
 
 		try {
 
-			if ($cat_autos->save()) {
+			if ($cat_pagos->save()) {
 
-                $msg = ['status' => 'ok', 'message' => 'Se ha guardado correctamente'];
+                $msg = ['status' => 'ok', 'message' => 'Se agrego su pago correctamente'];
 
 			}
 
@@ -99,6 +114,7 @@ class AutosController extends Controller {
 			DB::commit();
 
 		}
+        }
 
 		return response()->json($msg);
 
@@ -232,23 +248,19 @@ class AutosController extends Controller {
 
 
 
-	public function listadoAutoUser($id) {
+	public function listadoPagosWasher(Request $request) {
+		$id = request('id_washer');
+		$fecha = request('fecha');
 
-		$results = DB::table('autos as a')
+		$results = DB::table('pagos as p')
 
-		->select('a.id_auto', 'a.marca', 'a.imagen')
-
-		->where('a.id_usuario', $id)
-
+		//->select('p.id_pago', 'p.id_usuario', 'p.id_solicitud', 'p.monto','p.cambio','p.tipo_pago','p.status','p.comentario')
+		->select(DB::raw("IFNULL(sum(monto),0) as ganancias"))
+		->where('p.id_washer', $id)
+		->where('p.created_at', $fecha)
         ->get();
-
 		return response()->json($results);
-
 	}
-
-
-
-
 
 }
 

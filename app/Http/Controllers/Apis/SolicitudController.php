@@ -238,8 +238,8 @@ class SolicitudController extends Controller {
 
 	public function listadoporSolicitud($id) {
 		$results = DB::table('solicitud as s')
-		->select('s.id_solicitud', 's.id_usuario', 's.id_washer', 's.id_paquete', 's.latitud', 's.longitud', 's.foto', 's.fecha', 's.forma_pago', 's.cambio', 's.calificacion', 's.comentario', 's.calificacion', 's.status', 'a.placas', 'a.modelo',
-		'w.nombre', 'w.app', 'w.apm', 'w.foto_ine', 'p.nombre as paquete', 'u.nombre as usuario')
+		->select('s.id_solicitud', 's.id_usuario', 's.id_washer', 's.id_paquete', 's.latitud', 's.longitud', 's.fecha', 's.forma_pago', 's.cambio', 's.calificacion', 's.comentario', 's.calificacion', 's.foto_washer', 's.status', 'a.placas', 'a.modelo', 'a.ann',
+		'w.nombre', 'w.app', 'w.apm', 'w.foto_ine', 'p.nombre as paquete', 'u.nombre as usuario', 'u.foto')
 		->leftjoin('users as u', 'u.id', '=', 's.id_usuario')
 		->leftjoin('washers as w', 'w.id_washer', '=', 's.id_washer')
 		->leftjoin('paquetes_lavado as p', 'p.id_paquete', '=', 's.id_paquete')
@@ -334,6 +334,51 @@ class SolicitudController extends Controller {
 		} finally {
 			DB::commit();
 		}
+		return response()->json($msg);
+	}
+
+	public function modifica_cal(Request $request)
+	{
+		$id_solicitud = request('id_solicitud');
+		$calificacion = request('calificacion');
+		$comentario = request('comentario');
+		$cat_solicitud = Solicitudes::findOrFail($id_solicitud);
+
+		$cat_solicitud->calificacion = $calificacion;
+		$cat_solicitud->comentario = $comentario;
+
+		DB::beginTransaction();
+
+		try {
+
+			if ($cat_solicitud->save()) {
+
+				$msg = ['status' => 'ok', 'message' => 'Se Modifico la solicitud'];
+
+			}
+
+		} catch (\Illuminate\Database\QueryException $ex) {
+
+			DB::rollback();
+
+			$msg = ['status' => 'fail', 'message' => 'No se pudo guardar correctamente, por favor consulte con el administrador del sistema.', 'exception' => $ex->getMessage()];
+
+			return response()->json($msg, 400);
+
+		} catch (\Exception $ex) {
+
+			DB::rollback();
+
+			$msg = ['status' => 'fail', 'message' => 'No se pudo guardar correctamente, por favor consulte con el administrador del sistema.', 'exception' => $ex->getMessage()];
+
+			return response()->json($msg, 400);
+
+		} finally {
+
+			DB::commit();
+
+		}
+
 		return response()->json($msg);
 	}
 
@@ -438,6 +483,51 @@ class SolicitudController extends Controller {
         $result = curl_exec($ch);
         curl_close($ch);
         //return $result;
+	}
+
+	public function agrega_img(Request $request)
+	{
+		$id_sol = request('id_solicitud');
+		$foto = "http://washdryapp.com/oficial/Autos/".request('foto');
+		$cat_solicitud = Solicitudes::findOrFail($id_sol);
+		$fecha_atendida = date('Y-m-d H:i:s');
+
+		$cat_solicitud->foto_washer = $foto;
+		$cat_solicitud->fecha_atendida = $fecha_atendida;
+
+		DB::beginTransaction();
+
+		try {
+
+			if ($cat_solicitud->save()) {
+
+				$msg = ['status' => 'ok', 'message' => 'Se Modifico la solicitud'];
+
+			}
+
+		} catch (\Illuminate\Database\QueryException $ex) {
+
+			DB::rollback();
+
+			$msg = ['status' => 'fail', 'message' => 'No se pudo guardar correctamente, por favor consulte con el administrador del sistema.', 'exception' => $ex->getMessage()];
+
+			return response()->json($msg, 400);
+
+		} catch (\Exception $ex) {
+
+			DB::rollback();
+
+			$msg = ['status' => 'fail', 'message' => 'No se pudo guardar correctamente, por favor consulte con el administrador del sistema.', 'exception' => $ex->getMessage()];
+
+			return response()->json($msg, 400);
+
+		} finally {
+
+			DB::commit();
+
+		}
+
+		return response()->json($msg);
 	}
 }
 

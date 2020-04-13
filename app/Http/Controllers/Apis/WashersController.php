@@ -31,7 +31,7 @@ class WashersController extends Controller {
         $token = request('token');
         if (Auth::attempt(['email' => $usuario, 'password' => $pass])) {
         	$msg = DB::table('users as u')
-				->select('u.id', 'u.nombre','u.username','u.password','u.email','u.remember_token','u.name','u.google_id','u.token','w.id_washer as idWasher')
+				->select('u.id', 'u.nombre','u.username','u.password','u.email','u.remember_token','u.name','u.google_id', 'u.foto','u.token','w.id_washer as idWasher')
 				->leftjoin('washers as w', 'w.id_usuario', '=', 'u.id')
 				->where('u.email', $usuario)
 		        ->get();
@@ -129,8 +129,9 @@ class WashersController extends Controller {
 	//INSERT
 	public function store(Request $request) {
 		$passwor = $request->Input("password");
-		$paquete = $request->Input("id_paquete");
+		//$paquete = $request->Input("id_paquete");
 		$nombre = $request->Input("nombre");
+		$foto = "http://washdryapp.com/oficial/Perfiles/".$request->Input("foto");
         $cat_usuario = new Usuario();
 		$cat_usuario->nombre = $request->Input("nombre")." ".$request->Input("app")." ".$request->Input("apm");
 
@@ -138,6 +139,7 @@ class WashersController extends Controller {
 		$cat_usuario->fecha_nac = $request->Input("fecha_nac");
 		$cat_usuario->email = $request->Input("correo");
 		$cat_usuario->token = $request->Input("token");
+		$cat_usuario->foto = $foto;
 		$cat_usuario->password = Hash::make($passwor);
 		$cat_usuario->google_id = "1111";
 		$cat_usuario->username = $nombre;		
@@ -152,7 +154,7 @@ class WashersController extends Controller {
                 if ($cat_rolUser->save()) {
                 	$cat_washer = new Washers();
                 	$cat_washer->id_usuario = $idUser;
-                	$cat_washer->id_paquete = $paquete;
+                	//$cat_washer->id_paquete = $paquete;
                 	$cat_washer->nombre = $request->Input("nombre");
                 	$cat_washer->app = $request->Input("app");
 					$cat_washer->apm = $request->Input("apm");
@@ -188,14 +190,14 @@ class WashersController extends Controller {
 	//Update
 	public function update(Request $request) {
 		$id = request('id_usuario');
-		$paquete = $request->Input("id_paquete");
-		$passwor = $request->Input("password");
+		$passwor = request('password');
         $cat_usuario = Usuario::findOrFail($id);
-		$cat_usuario->nombre = $request->Input("nombre")." ".$request->Input("app")." ".$request->Input("apm");
-		$cat_usuario->name = $request->Input("nombre");
-		$cat_usuario->email = $request->Input("correo");
+		$cat_usuario->nombre = request('nombre')." ".request("app")." ".request("apm");
+		$cat_usuario->name = request("nombre");
+		$cat_usuario->email = request("correo");
 		$cat_usuario->password = Hash::make($passwor);
 		$cat_usuario->username = $request->Input("nombre");
+		$cat_usuario->foto = $request->Input("foto");
 		DB::beginTransaction();
 		try {
 			$msg = DB::table('washers as w')
@@ -207,12 +209,9 @@ class WashersController extends Controller {
 			if ($cat_usuario->save()) {
 				$cat_washer = Washers::findOrFail($idWasher);
 				$cat_washer->id_usuario = $id;
-				$cat_washer->id_paquete = $paquete;
 				$cat_washer->nombre = $request->Input("nombre");
 				$cat_washer->app = $request->Input("app");
 				$cat_washer->apm = $request->Input("apm");
-				//$cat_washer->telefono = $request->Input("telefono");
-				//$cat_washer->foto_ine = $request->Input("ine");
 				if($cat_washer->save()){
 					$msg = ['status' => 'ok', 'message' => 'Se actualizo correctamente'];	
 				}
@@ -296,7 +295,7 @@ class WashersController extends Controller {
 	public function getPerfilWasher($id)
 	{
 		$results = DB::table('washers as w')
-		->select('w.id_washer', 'w.id_usuario', 'w.nombre', 'w.app', 'w.apm', 'w.telefono', 'w.foto_ine', 'w.id_paquete', 'w.fca_nacimiento', 'u.email')
+		->select('w.id_washer as idWasher', 'w.id_usuario', 'w.nombre', 'w.app', 'w.apm', 'w.telefono', 'w.foto_ine', 'w.id_paquete', 'w.fca_nacimiento', 'u.email', 'u.foto')
 		->leftjoin('users as u', 'u.id', '=', 'w.id_usuario')
 		->where('u.id',$id)
 		->get();
@@ -354,7 +353,7 @@ class WashersController extends Controller {
         ];
 
         $headers = [
-            'Authorization: key=AAAA_YTXHaU:APA91bHMAq95ha-hiwv_trQ9uKdCjNoWpTwZnxuf3q9FCkkFIzuPQz7aYCEwyvfSxl9hrkrnuhLUUTRaou1cJP95Df2zDd4kAFiwJv1uEUP0SCnDmGDEgAoStYq4s7j1NRFeEqFHi2KT',
+            'Authorization: key=AAAAJBsH6ro:APA91bEJ9I8FnVFqRSeoRSxNv9mT17C876UrWLRY0d6Ow7jV9pcI9Dizb6hf4A1go3MnzY9V4XpU-25XwTqvc-PMIdHVJz6aTLF9yC0Hp4wc5a3pa7EbUKyV_gv5b_r5lGTQnpas0SOp',
             'Content-Type: application/json'
         ];
 
@@ -418,17 +417,22 @@ class WashersController extends Controller {
 
 	public function storeImg(Request $request) {
 	    
-        $uploaddir = 'uploads/autos/';
-        $ext =  $request->file('file')->getClientOriginalExtension();
+        $uploaddir = 'uploads/autos';
+        $ext =  $_FILES['file']['name'];//$request->file('file')->getClientOriginalExtension();
 
-		$filename = time().'.'.$ext;//time().'.'.$ext;
+		$filename = $ext;//time().'.'.$ext;
 
 		$upload = $request->file('file')->storeAs(
 
 		    'uploads/autos', $filename
 
 		);
+		$file_name = $_FILES['file']['name'];
+
+        //$uploadfile = $uploaddir.$file_name;
+    
         
-        return $upload;
+        
+        return $uploaddir.'/'.$file_name;
     }
 }
