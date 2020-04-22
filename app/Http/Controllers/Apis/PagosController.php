@@ -11,6 +11,7 @@ use App;
 use App\Http\Controllers\Controller;
 
 use App\Models\Catalogos\Pagos;
+use App\Models\Catalogos\Solicitudes;
 use Stripe\Stripe;
 
 use Stripe\Charge;
@@ -42,15 +43,18 @@ class PagosController extends Controller {
 	//INSERT
 
 	public function store(Request $request) {
-
-		Stripe::setApiKey(config('services.stripe.secret'));
-
-        $token = request('stripeToken');
-        $email = request('email');
+		$id_sol = request("id_solicitud");
+		$email = request('email');
         $monto = request("monto");
+        $tipo_pago = request("tipo_pago");
         $montoStripe = $monto * 100;
-
-        $charge = Charge::create([
+        if($tipo_pago == "Efectivo")
+        {
+        	$estatuss = 1;
+        }else{
+        	Stripe::setApiKey(config('services.stripe.secret'));
+        	$token = request('stripeToken');
+        	$charge = Charge::create([
 
             'amount' => $montoStripe,
 
@@ -60,9 +64,11 @@ class PagosController extends Controller {
 
             'source' => $token,
 
-        ]);
+        	]);
 
-        $estatuss = $charge['status'] == "succeeded" ? 1:0;
+        	$estatuss = $charge['status'] == "succeeded" ? 1:0;	
+        }
+        
         $fecha_a =  date('Y-m-d');
         if($estatuss == 1){
         	$cat_pagos = new Pagos();
@@ -71,7 +77,7 @@ class PagosController extends Controller {
 
         $cat_pagos->id_washer = request("id_washer");
 
-        $cat_pagos->id_solicitud = request("id_solicitud");
+        $cat_pagos->id_solicitud = $id_sol;
 
         $cat_pagos->monto = request("monto");
 
@@ -88,8 +94,21 @@ class PagosController extends Controller {
 		try {
 
 			if ($cat_pagos->save()) {
-
-                $msg = ['status' => 'ok', 'message' => 'Se agrego su pago correctamente'];
+                $id_usuario = request("id_usuario");
+                $id_usuario_w = request("id_washer");
+                $return = $this->notificaPersonalizada($id_usuario,"Pago realizado Correctamente","Bienvenido");
+                $userW = DB::table('washers')->where('id_washer', $id_usuario_w)->first();
+                if ($userW) {
+                	$id_usuarioWash = $userW->id_usuario;
+                	$return = $this->notificaPersonalizada($id_usuarioWash,"Se realizo el pago por tu servicio","Mirar");
+                }
+                $cat_solicitud = Solicitudes::findOrFail($id_sol);
+                $cat_solicitud->status = 5;
+                if ($cat_solicitud->save()) {
+                	$msg = ['status' => 'ok', 'message' => 'Se agrego su pago correctamente','ID USUARIO'=>$id_usuario,'ID WASH'=>$id_usuarioWash,'Solicitud'=>$id_sol];
+                }else{
+                	$msg = ['status' => 'ok', 'message' => 'Se agrego su pago correctamente','ID USUARIO'=>$id_usuario,'ID WASH'=>$id_usuarioWash];
+                }
 
 			}
 
@@ -115,27 +134,9 @@ class PagosController extends Controller {
 
 		}
         }
-
 		return response()->json($msg);
-
 	}
-
-	//Edit
-
-	public function edit($id) {
-
-		$results = DB::table('autos as a')
-
-		->select('a.id_auto', 'a.id_usuario', 'a.placas', 'a.modelo','a.ann','a.marca','a.color','a.imagen')
-
-		->where('a.id_auto',$id)->get();
-
-		return response()->json($results);
-
-    }
-
 	//Update
-
 	public function update(Request $request, $id) {
 
 		$cat_paquete = Paquete::findOrFail($id);
@@ -183,9 +184,7 @@ class PagosController extends Controller {
 		return response()->json($msg);
 
 	}
-
 	//Eliminar
-
 	public function destroy($id) {
 
 		$msg = [];
@@ -230,8 +229,6 @@ class PagosController extends Controller {
 
 	}
 
-
-
 	public function listado() {
 
 		$results = DB::table('autos as a')
@@ -243,10 +240,6 @@ class PagosController extends Controller {
 		return response()->json($results);
 
 	}
-
-
-
-
 
 	public function listadoPagosWasher(Request $request) {
 		$id = request('id_washer');
@@ -261,6 +254,54 @@ class PagosController extends Controller {
         ->get();
 		return response()->json($results);
 	}
+
+	//$return = $this->notificaPersonalizada($id_usuario,"Su Nueva Contraseña es: ".$randomString,"Bienvenido");
+
+	public function notificaPersonalizada($idUser,$title,$mensaje)
+	{
+		$fcmUrl = 'https://fcm.googleapis.com/fcm/send';
+        $id_usuario = $idUser;
+        $title = $title;
+        $mensaje = $mensaje;
+        $msg = DB::table('users as u')
+				->select('u.id', 'u.token')
+				->where('u.id', $id_usuario)
+		        ->get();
+		$token = $msg[0]->token;
+
+        $notification = [
+            'title' => $title,
+            'message' => $mensaje,
+            'sound' => true,
+        ];
+        
+        $extraNotificationData = ["message" => $notification,"moredata" =>'dd'];
+
+        $fcmNotification = [
+            //'registration_ids' => $tokenList, //multple token array
+            'to'        => $token, //single token
+            'notification' => $notification,
+            'data' => $extraNotificationData
+        ];
+
+        $headers = [
+            'Authorization: key=AAAAJBsH6ro:APA91bEJ9I8FnVFqRSeoRSxNv9mT17C876UrWLRY0d6Ow7jV9pcI9Dizb6hf4A1go3MnzY9V4XpU-25XwTqvc-PMIdHVJz6aTLF9yC0Hp4wc5a3pa7EbUKyV_gv5b_r5lGTQnpas0SOp',
+            'Content-Type: application/json'
+        ];
+
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL,$fcmUrl);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmNotification));
+        $result = curl_exec($ch);
+        curl_close($ch);
+        //return $result;
+	}
+
 
 }
 

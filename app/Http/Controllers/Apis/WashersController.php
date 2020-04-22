@@ -35,7 +35,7 @@ class WashersController extends Controller {
 				->leftjoin('washers as w', 'w.id_usuario', '=', 'u.id')
 				->where('u.email', $usuario)
 		        ->get();
-		    $id = $msg[0]->id;
+		    	$id = $msg[0]->id;
 
 		        $cat_usuario = Usuario::findOrFail($id);
 	        	$cat_usuario->token = $token;
@@ -65,23 +65,7 @@ class WashersController extends Controller {
         return response()->json($msg);
 	}
 	//TEMPORAL
-	public function loginChema(Request $request)
-	{
-		$msg = [];
-		$usuario = "yane@mail.com";
-        $pass = "1234";
-        if (Auth::attempt(['email' => $usuario, 'password' => $pass])) {
-        	$msg = DB::table('users as u')
-				->select('u.id', 'u.nombre','u.username','u.password','u.email','u.remember_token','u.name','u.google_id')
-				->where('u.email', $usuario)
-		        ->get();
-        } else {
-            $msg[] = [
-            	'nombre'=>'fail'
-            ];
-        }
-        return response()->json($msg);
-	}
+	
 
 	public function recupera_pass(Request $request) {
 		$email = request('correo');
@@ -128,6 +112,7 @@ class WashersController extends Controller {
 	//Registro Washer
 	//INSERT
 	public function store(Request $request) {
+		$correo = $request->Input("correo");
 		$passwor = $request->Input("password");
 		//$paquete = $request->Input("id_paquete");
 		$nombre = $request->Input("nombre");
@@ -137,56 +122,55 @@ class WashersController extends Controller {
 
 		$cat_usuario->name = request("nombre");
 		$cat_usuario->fecha_nac = $request->Input("fecha_nac");
-		$cat_usuario->email = $request->Input("correo");
+		$cat_usuario->telefono = $request->Input("telefono");
+		$cat_usuario->email = $correo;
 		$cat_usuario->token = $request->Input("token");
 		$cat_usuario->foto = $foto;
 		$cat_usuario->password = Hash::make($passwor);
 		$cat_usuario->google_id = "1111";
 		$cat_usuario->username = $nombre;		
-		
-		DB::beginTransaction();
-		try {
-			if ($cat_usuario->save()) {
-                $idUser = $cat_usuario->id;
-                $cat_rolUser = new RolesUser();
-                $cat_rolUser->id_user = $idUser;
-                $cat_rolUser->id_rol = 2;
-                if ($cat_rolUser->save()) {
-                	$cat_washer = new Washers();
-                	$cat_washer->id_usuario = $idUser;
-                	//$cat_washer->id_paquete = $paquete;
-                	$cat_washer->nombre = $request->Input("nombre");
-                	$cat_washer->app = $request->Input("app");
-					$cat_washer->apm = $request->Input("apm");
-					$cat_washer->fca_nacimiento = $request->Input("fecha_nac");
-					$cat_washer->telefono = $request->Input("telefono");
-					$cat_washer->foto_ine = $request->Input("ine");
-                	$cat_washer->status_washer = 1;
-                	if ($cat_washer->save()) {
-                		$msg = ['status' => 'ok', 'message' => 'Se ha guardado correctamente', 'ID' => $idUser];
-                	}
-                }
+		$user_mail = DB::table('users')->where('email', $correo)->first();
+        if ($user_mail) {
+        	$msg = ['status' => 'ok', 'message' => 'Correo ya registrado con algun usuario'];
+        	return response()->json($msg, 400);
+        }else{
+        	DB::beginTransaction();
+			try {
+				if ($cat_usuario->save()) {
+	                $idUser = $cat_usuario->id;
+	                $cat_rolUser = new RolesUser();
+	                $cat_rolUser->id_user = $idUser;
+	                $cat_rolUser->id_rol = 2;
+	                if ($cat_rolUser->save()) {
+	                	$cat_washer = new Washers();
+	                	$cat_washer->id_usuario = $idUser;
+	                	//$cat_washer->id_paquete = $paquete;
+	                	$cat_washer->nombre = $request->Input("nombre");
+	                	$cat_washer->app = $request->Input("app");
+						$cat_washer->apm = $request->Input("apm");
+						$cat_washer->fca_nacimiento = $request->Input("fecha_nac");
+						$cat_washer->telefono = $request->Input("telefono");
+						$cat_washer->foto_ine = $request->Input("ine");
+	                	$cat_washer->status_washer = 1;
+	                	if ($cat_washer->save()) {
+	                		$msg = ['status' => 'ok', 'message' => 'Se ha guardado correctamente', 'ID' => $idUser];
+	                	}
+	                }
+				}
+			} catch (\Illuminate\Database\QueryException $ex) {
+				DB::rollback();
+				$msg = ['status' => 'fail', 'message' => 'No se pudo guardar correctamente, por favor consulte con el administrador del sistema.', 'exception' => $ex->getMessage()];
+				return response()->json($msg, 400);
+			} catch (\Exception $ex) {
+				DB::rollback();
+				$msg = ['status' => 'fail', 'message' => 'No se pudo guardar correctamente, por favor consulte con el administrador del sistema.', 'exception' => $ex->getMessage()];
+				return response()->json($msg, 400);
+			} finally {
+				DB::commit();
 			}
-		} catch (\Illuminate\Database\QueryException $ex) {
-			DB::rollback();
-			$msg = ['status' => 'fail', 'message' => 'No se pudo guardar correctamente, por favor consulte con el administrador del sistema.', 'exception' => $ex->getMessage()];
-			return response()->json($msg, 400);
-		} catch (\Exception $ex) {
-			DB::rollback();
-			$msg = ['status' => 'fail', 'message' => 'No se pudo guardar correctamente, por favor consulte con el administrador del sistema.', 'exception' => $ex->getMessage()];
-			return response()->json($msg, 400);
-		} finally {
-			DB::commit();
-		}
-        return response()->json($msg);
+			return response()->json($msg);
+        }
 	}
-	//Edit
-	public function edit($id) {
-		$results = DB::table('direcciones as d')
-		->select('d.id_direccion', 'd.latitud', 'd.longitud', 'd.descripcion')
-		->where('d.id_direccion',$id)->get();
-		return response()->json($results);
-    }
 	//Update
 	public function update(Request $request) {
 		$id = request('id_usuario');
@@ -398,7 +382,7 @@ class WashersController extends Controller {
         ];
 
         $headers = [
-            'Authorization: key=AAAA_YTXHaU:APA91bHMAq95ha-hiwv_trQ9uKdCjNoWpTwZnxuf3q9FCkkFIzuPQz7aYCEwyvfSxl9hrkrnuhLUUTRaou1cJP95Df2zDd4kAFiwJv1uEUP0SCnDmGDEgAoStYq4s7j1NRFeEqFHi2KT',
+            'Authorization: key=AAAAJBsH6ro:APA91bEJ9I8FnVFqRSeoRSxNv9mT17C876UrWLRY0d6Ow7jV9pcI9Dizb6hf4A1go3MnzY9V4XpU-25XwTqvc-PMIdHVJz6aTLF9yC0Hp4wc5a3pa7EbUKyV_gv5b_r5lGTQnpas0SOp',
             'Content-Type: application/json'
         ];
 

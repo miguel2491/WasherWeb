@@ -43,6 +43,13 @@ class CalificacionController extends Controller {
 
 	public function store(Request $request) {
 		$id_solicitud = request('id_solicitud');
+
+		$user = DB::table('solicitud')->where('id_solicitud', $id_solicitud)->first();
+        if ($user) {
+        	$id_usuario = $user->id_usuario;
+        	$return = $this->notificaPersonalizadaUsuario($id_usuario,"Obtuviste tu calificación","Mirar");
+        }
+
         $cat_calificacion = new Calificaciones();
 
         $cat_calificacion->id_solicitud = $request->Input("id_solicitud");
@@ -57,7 +64,7 @@ class CalificacionController extends Controller {
 
 			if ($cat_calificacion->save()) {
 				$cat_solicitud = Solicitudes::findOrFail($id_solicitud);
-                $cat_solicitud->status = 5;
+                $cat_solicitud->status = 7;
                 if ($cat_solicitud->save()) {
                 	$msg = ['status' => 'ok', 'message' => 'Se ha guardado correctamente'];	
                 	//Notifica sobre tu calificacion
@@ -211,6 +218,51 @@ class CalificacionController extends Controller {
 
 		return response()->json($results);
 
+	}
+
+	public function notificaPersonalizadaUsuario($idUser,$title,$mensaje)
+	{
+		$fcmUrl = 'https://fcm.googleapis.com/fcm/send';
+        $id_usuario = $idUser;
+        $title = $title;
+        $mensaje = $mensaje;
+        $msg = DB::table('users as u')
+				->select('u.id', 'u.token')
+				->where('u.id', $id_usuario)
+		        ->get();
+		$token = $msg[0]->token;
+
+        $notification = [
+            'title' => $title,
+            'message' => $mensaje,
+            'sound' => true,
+        ];
+        
+        $extraNotificationData = ["message" => $notification,"moredata" =>'dd'];
+
+        $fcmNotification = [
+            //'registration_ids' => $tokenList, //multple token array
+            'to'        => $token, //single token
+            'notification' => $notification,
+            'data' => $extraNotificationData
+        ];
+
+        $headers = [
+            'Authorization: key=AAAAJBsH6ro:APA91bEJ9I8FnVFqRSeoRSxNv9mT17C876UrWLRY0d6Ow7jV9pcI9Dizb6hf4A1go3MnzY9V4XpU-25XwTqvc-PMIdHVJz6aTLF9yC0Hp4wc5a3pa7EbUKyV_gv5b_r5lGTQnpas0SOp',
+            'Content-Type: application/json'
+        ];
+
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL,$fcmUrl);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmNotification));
+        $result = curl_exec($ch);
+        curl_close($ch);
+        //return $result;
 	}
 }
 

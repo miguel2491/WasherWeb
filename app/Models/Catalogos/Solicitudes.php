@@ -30,6 +30,6 @@ class Solicitudes extends Model {
 
     protected $primaryKey = 'id_solicitud';
 
-	protected $fillable = ['id_solicitud', 'id_washer','id_usuario','id_paquete','latitud','longitud','foto','foto_washer', 'fecha','calificacion','comentario', 'forma_pago', 'cambio', 'status','fecha_atendida'];
+	protected $fillable = ['id_solicitud', 'id_washer','id_usuario','id_paquete', 'id_auto','latitud','longitud','foto','foto_washer', 'fecha','calificacion','comentario', 'forma_pago', 'cambio', 'status','fecha_atendida'];
 
 }

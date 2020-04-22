@@ -232,6 +232,8 @@ class PaquetesController extends Controller {
 
 				'paquetes_lavado.descripcion',
 
+				'paquetes.id',
+
 				'paquetes.tipo_vehiculo',
 
 				'paquetes.duracion',

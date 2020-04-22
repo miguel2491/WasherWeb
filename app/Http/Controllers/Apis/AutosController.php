@@ -66,7 +66,7 @@ class AutosController extends Controller {
 
         $cat_autos->color = $request->Input("color");
 
-        $cat_autos->imagen = $request->Input("imagen");
+        $cat_autos->imagen = "http://washdryapp.com/oficial/Autos/".$request->Input("imagen");
 
         DB::beginTransaction();
 

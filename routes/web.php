@@ -46,7 +46,7 @@ Route::get('auto/listadoAutoUser/{id}', 'Apis\AutosController@listadoAutoUser');
 Route::post('auto/guardar', 'Apis\AutosController@store');
 Route::post('auto/imagen', 'PaymentsController@imagen');
 Route::get('auto/datos/{id}', 'Apis\AutosController@edit');
-Route::delete('auto/delete/{id}', 'Apis\AutosController@destroy');
+Route::get('auto/delete/{id}', 'Apis\AutosController@destroy');
 //Direcciones
 Route::get('direccion/listado', 'Apis\DireccionesController@listado');
 Route::post('direccion/guardar', 'Apis\DireccionesController@guardar');
@@ -57,9 +57,13 @@ Route::delete('direccion/delete/{id}', 'Apis\DireccionesController@destroy');
 Route::post('solicitud/agrega', 'Apis\SolicitudController@store');
 Route::get('solicitud/listado/{id}', 'Apis\SolicitudController@listadoSolicitud');
 Route::get('solicitud/lista_solicitud/{id}', 'Apis\SolicitudController@listadoporSolicitud');
+Route::get('solicitud/lista_all/{id}', 'Apis\SolicitudController@listaSolicitud');
 Route::post('solicitud/califica', 'Apis\SolicitudController@calificaSolicitud');
 Route::post('solicitud/aceptar_solicitud', 'Apis\SolicitudController@aceptar_solicitud');
 Route::get('solicitud/cliente/{id}', 'Apis\SolicitudController@consultaCliente');
+Route::post('solicitud/cliente_cancelar', 'Apis\SolicitudController@cancela_solicitud');
+Route::post('solicitud/confirmaLlegada', 'Apis\SolicitudController@confirmar_llegada');
+
 
 //**APP 1**/
 Route::post('solicitud/agrega_cliente', 'Apis\SolicitudController@guarda_cliente');
@@ -72,7 +76,11 @@ Route::post('washer/login', 'Apis\WashersController@login');
 Route::get('washer/loginChema', 'Apis\WashersController@loginChema');
 Route::post('washer/recupera_pass', 'Apis\WashersController@recupera_pass');
 //Cliente Update
+Route::post('cliente/registra', 'Apis\ClientesController@store');
+Route::post('cliente/actualiza', 'Apis\ClientesController@update');
 Route::post('cliente/califica', 'Apis\CalificacionController@store');
+Route::get('cliente/getPerfil/{id}', 'Apis\ClientesController@getPerfilCliente');
+
 //Paquetes
 Route::get('paquete/listado', 'Apis\PaquetesController@listado');
 Route::post('paquete/guardar', 'Apis\PaquetesController@store');
@@ -101,4 +109,6 @@ Route::post('pagos/listaPagos', 'Apis\PagosController@listadoPagosWasher');
 
 //Notificaciones
 Route::post('washer/notificaciones', 'Apis\WashersController@notifica');
+Route::post('cliente/notificacliente', 'Apis\ClientesController@notifica');
+Route::post('washer/notifica', 'Apis\SolicitudController@notifica');
 Route::get('mail/recuperaPass', 'Apis\WashersController@send');
