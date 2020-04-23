@@ -263,14 +263,16 @@ class WashersController extends Controller {
 	public function getSolicitudLavado($id)
 	{
 		$results = DB::table('solicitud as s')
-		->select('s.id_solicitud','s.id_washer', 's.id_usuario', 's.id_paquete', 's.id_auto', 's.fecha','s.calificacion', 's.latitud', 's.longitud', 's.fecha', 'u.nombre', 'u.foto', 'a.modelo', 'a.ann', 'a.placas', 'p.tipo_vehiculo', 'p.precio', 'pa.nombre as paquete')
+		->select('s.id_solicitud','s.id_washer', 's.id_usuario', 's.id_paquete', 's.id_auto', 's.fecha', 's.latitud', 's.longitud', 's.fecha', 'u.nombre', 'u.foto', 'a.modelo', 'a.ann', 'a.placas', 'p.tipo_vehiculo', 'p.precio', 'pa.nombre as paquete', DB::raw('IFNULL( cal.calificacion, 1) as calificacion'))
         ->leftjoin('washers as w', 'w.id_usuario', '=', 's.id_usuario')
         ->leftjoin('users as u', 'u.id', '=', 's.id_usuario')
         ->leftjoin('autos as a', 'a.id_auto', '=', 's.id_auto')
         ->leftjoin('paquetes as p', 'p.id', '=', 's.id_paquete')
         ->leftjoin('paquetes_lavado as pa', 'pa.id_paquete', '=', 'p.id_paquete')
+        ->join('calificaciones as cal', 'cal.id_solicitud', '=', 's.id_solicitud')
+        ->where('cal.tipo_calificacion','W')
         ->where('s.id_washer',$id)
-        ->where('s.status','=', '5')
+        ->where('s.status','=', 7)
 		->get();
 		return response()->json($results);
 	}
@@ -279,7 +281,7 @@ class WashersController extends Controller {
 	public function getPerfilWasher($id)
 	{
 		$results = DB::table('washers as w')
-		->select('w.id_washer as idWasher', 'w.id_usuario', 'w.nombre', 'w.app', 'w.apm', 'w.telefono', 'w.foto_ine', 'w.id_paquete', 'w.fca_nacimiento', 'u.email', 'u.foto')
+		->select('w.id_washer as idWasher', 'w.id_usuario', 'w.nombre', 'w.app', 'w.apm', 'w.telefono', DB::raw('IFNULL( w.foto_ine, "") as foto_ine'), 'w.fca_nacimiento', 'u.email', 'u.foto')
 		->leftjoin('users as u', 'u.id', '=', 'w.id_usuario')
 		->where('u.id',$id)
 		->get();

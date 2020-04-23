@@ -206,7 +206,59 @@ class CalificacionController extends Controller {
 
 	}
 
+	public function califica_washer(Request $request) {
+		$id_solicitud = request('id_solicitud');
 
+        $cat_calificacion = new Calificaciones();
+
+        $cat_calificacion->id_solicitud = $request->Input("id_solicitud");
+
+        $cat_calificacion->calificacion = $request->Input("calificacion");
+
+        $cat_calificacion->comentario = $request->Input("comentario");
+
+        DB::beginTransaction();
+
+		try {
+
+			if ($cat_calificacion->save()) {
+				$msg = ['status' => 'ok', 'message' => 'Se ha guardado correctamente'];
+				$user = DB::table('solicitud')->where('id_solicitud', $id_solicitud)->first();
+		        if ($user) {
+		        	$id_washer = $user->id_washer;
+		        	$washer = DB::table('washers')->where('id_washer', $id_washer)->first();
+		        	if ($washer) {
+		        		$id_usuario_washer = $user->id_usuario;
+		        		$return = $this->notificaPersonalizadaUsuario($id_usuario_washer,"Obtuviste tu calificación","Mirar");
+		        	}
+		        }	
+                //Notifica sobre tu calificacion
+            }
+		} catch (\Illuminate\Database\QueryException $ex) {
+
+			DB::rollback();
+
+			$msg = ['status' => 'fail', 'message' => 'No se pudo guardar correctamente, por favor consulte con el administrador del sistema.', 'exception' => $ex->getMessage()];
+
+			return response()->json($msg, 400);
+
+		} catch (\Exception $ex) {
+
+			DB::rollback();
+
+			$msg = ['status' => 'fail', 'message' => 'No se pudo guardar correctamente, por favor consulte con el administrador del sistema.', 'exception' => $ex->getMessage()];
+
+			return response()->json($msg, 400);
+
+		} finally {
+
+			DB::commit();
+
+		}
+
+		return response()->json($msg);
+
+	}
 
 	public function listado() {
 
