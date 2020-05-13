@@ -260,6 +260,19 @@ class CalificacionController extends Controller {
 
 	}
 
+	public function getCalifica($id)
+	{
+		$results = DB::table('calificaciones as c')
+
+		->select('c.id_calificacion', 'c.calificacion', DB::raw('IFNULL( c.comentario, "") as comentario'), 'c.tipo_calificacion', 'c.satus')
+
+		->where('c.id_solicitud',$id)
+
+		->get();
+
+		return response()->json($results);
+	}
+
 	public function listado() {
 
 		$results = DB::table('autos as a')
