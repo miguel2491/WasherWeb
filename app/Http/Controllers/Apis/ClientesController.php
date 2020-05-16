@@ -920,7 +920,7 @@ class ClientesController extends Controller {
 
 	public function listadoporSolicitud($id) {
 		$results = DB::table('solicitud as s')
-		->select('s.id_solicitud', 's.id_usuario', 's.id_washer', 's.id_paquete', 's.latitud', 's.longitud', 's.fecha', 's.forma_pago', 's.cambio', DB::raw('IFNULL( s.comentario, "") as comentario'), DB::raw('IFNULL( s.foto_washer, "") as foto_washer'), 's.calificacion', 's.status', 'a.placas', 'a.modelo', 'a.ann', 'pa.nombre as paquete', 'u.nombre as usuario', 'u.foto', 'p.precio')
+		->select('s.id_solicitud', 's.id_usuario', 's.id_washer', 's.id_paquete', 's.latitud', 's.longitud', 's.fecha', 's.forma_pago', 's.cambio', DB::raw('IFNULL( s.direccion, "") as direccion'), 's.fragancia', DB::raw('IFNULL( s.comentario, "") as comentario'), DB::raw('IFNULL( s.foto_washer, "") as foto_washer'), 's.calificacion', 's.status', 'a.placas', 'a.modelo', 'a.ann', 'pa.nombre as paquete', 'u.nombre as usuario', 'u.foto', 'p.precio')
 		->leftjoin('users as u', 'u.id', '=', 's.id_usuario')
 		->leftjoin('washers as w', 'w.id_washer', '=', 's.id_washer')
 		->leftjoin('paquetes as p', 'p.id', '=', 's.id_paquete')

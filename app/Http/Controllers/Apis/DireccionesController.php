@@ -44,6 +44,7 @@ class DireccionesController extends Controller {
 		$cat_direcciones->id_usuario = $request->Input("id_usuario");
 		$cat_direcciones->latitud = $request->Input("latitude");
 		$cat_direcciones->longitud = $request->Input("longitude");
+		$cat_direcciones->direccion = $request->Input("direccion_gp");
 		$cat_direcciones->descripcion = $request->Input("descripcion");
 		DB::beginTransaction();
 		try {
